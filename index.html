@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f1117" />
+  <meta name="description" content="WorkFlow — Daily Work Assignment & Reminder, offline-ready" />
+  <title>WorkFlow — Daily Planner</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="sound-styles.css" />
+</head>
+<body>
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">⬡</span>
+      <span class="logo-text">WorkFlow</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-btn active" data-view="today">
+        <span class="nav-icon">◈</span> Today
+      </button>
+      <button class="nav-btn" data-view="all">
+        <span class="nav-icon">◫</span> All Tasks
+      </button>
+      <button class="nav-btn" data-view="schedule">
+        <span class="nav-icon">▦</span> Schedule
+      </button>
+      <button class="nav-btn" data-view="reminders">
+        <span class="nav-icon">◷</span> Reminders
+      </button>
+      <button class="nav-btn" data-view="stats">
+        <span class="nav-icon">◎</span> Weekly Stats
+      </button>
+    </nav>
+
+    <div class="sidebar-stats">
+      <div class="stat-card">
+        <span class="stat-num" id="stat-done">0</span>
+        <span class="stat-label">Done today</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num" id="stat-pending">0</span>
+        <span class="stat-label">Pending</span>
+      </div>
+    </div>
+
+    <!-- Pomodoro Timer Widget -->
+    <div class="pomo-widget" id="pomo-widget">
+      <div class="pomo-label" id="pomo-label">Focus Timer</div>
+      <div class="pomo-ring-wrap">
+        <svg class="pomo-ring" viewBox="0 0 64 64">
+          <circle cx="32" cy="32" r="27" class="pomo-track"/>
+          <circle cx="32" cy="32" r="27" class="pomo-progress" id="pomo-circle"/>
+        </svg>
+        <span class="pomo-time" id="pomo-time">25:00</span>
+      </div>
+      <div class="pomo-controls">
+        <button class="pomo-btn" id="pomo-start">▶</button>
+        <button class="pomo-btn" id="pomo-reset">↺</button>
+      </div>
+      <div class="pomo-sessions" id="pomo-sessions">○ ○ ○ ○</div>
+    </div>
+
+    <div class="sidebar-date" id="sidebar-date"></div>
+  </aside>
+
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- ── MAIN ── -->
+  <main class="main-content">
+
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <h1 class="page-title" id="page-title">Today's Tasks</h1>
+      <div class="header-actions">
+        <button class="icon-btn" id="export-btn" title="Export data">⤓</button>
+        <button class="icon-btn" id="import-btn-trigger" title="Import data">⤒</button>
+        <input type="file" id="import-file-input" accept=".json" style="display:none" />
+        <button class="icon-btn" id="notify-toggle" title="Toggle notifications">🔔</button>
+        <button class="icon-btn" id="theme-toggle" title="Toggle theme">◐</button>
+        <button class="icon-btn" id="shortcut-btn" title="Keyboard shortcuts (?)">⌨</button>
+      </div>
+    </header>
+
+    <!-- ── VIEW: TODAY / ALL ── -->
+    <section class="view" id="view-today">
+      <div class="add-task-card" id="add-task-card">
+        <input type="text" id="task-input" class="task-input" placeholder="Add a new task… (press N)" maxlength="120" autocomplete="off" />
+        <div class="task-meta-row">
+          <select id="task-priority" class="meta-select">
+            <option value="high">🔴 High</option>
+            <option value="medium" selected>🟡 Medium</option>
+            <option value="low">🟢 Low</option>
+          </select>
+          <select id="task-category" class="meta-select">
+            <option value="work">💼 Work</option>
+            <option value="personal">🏠 Personal</option>
+            <option value="meeting">🤝 Meeting</option>
+            <option value="learning">📚 Learning</option>
+          </select>
+          <select id="task-recur" class="meta-select">
+            <option value="none">No repeat</option>
+            <option value="daily">↻ Daily</option>
+            <option value="weekly">↻ Weekly</option>
+          </select>
+          <input type="date" id="task-date" class="meta-select" />
+          <input type="time" id="task-time" class="meta-select" />
+          <button class="add-btn" id="add-task-btn">+ Add</button>
+        </div>
+      </div>
+
+      <!-- Search bar -->
+      <div class="search-bar-wrap">
+        <input type="text" id="search-input" class="search-input" placeholder="🔍 Search tasks…" autocomplete="off" />
+        <button class="search-clear hidden" id="search-clear">✕</button>
+      </div>
+
+      <div class="task-list-wrapper">
+        <div class="filter-bar">
+          <button class="filter-chip active" data-filter="all">All</button>
+          <button class="filter-chip" data-filter="high">🔴 High</button>
+          <button class="filter-chip" data-filter="medium">🟡 Medium</button>
+          <button class="filter-chip" data-filter="low">🟢 Low</button>
+          <button class="filter-chip" data-filter="done">✓ Done</button>
+        </div>
+        <ul class="task-list" id="task-list"></ul>
+        <div class="empty-state" id="empty-state">
+          <div class="empty-icon">◈</div>
+          <p>No tasks yet — add one above or press <kbd>N</kbd></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── VIEW: ALL TASKS (grouped by date) ── -->
+    <section class="view hidden" id="view-all">
+      <!-- Search bar (all tasks) -->
+      <div class="search-bar-wrap">
+        <input type="text" id="search-input-all" class="search-input" placeholder="🔍 Search all tasks…" autocomplete="off" />
+        <button class="search-clear hidden" id="search-clear-all">✕</button>
+      </div>
+      <div class="filter-bar">
+        <button class="filter-chip active" data-filter-all="all">All</button>
+        <button class="filter-chip" data-filter-all="high">🔴 High</button>
+        <button class="filter-chip" data-filter-all="medium">🟡 Medium</button>
+        <button class="filter-chip" data-filter-all="low">🟢 Low</button>
+        <button class="filter-chip" data-filter-all="done">✓ Done</button>
+      </div>
+      <div id="all-tasks-container"></div>
+      <div class="empty-state hidden" id="all-empty-state">
+        <div class="empty-icon">◫</div>
+        <p>No tasks found.</p>
+      </div>
+    </section>
+
+    <!-- ── VIEW: SCHEDULE (Time Blocking) ── -->
+    <section class="view hidden" id="view-schedule">
+      <div class="schedule-nav-bar">
+        <button class="icon-btn" id="sched-prev">‹</button>
+        <span class="sched-date-label" id="sched-date-label"></span>
+        <button class="icon-btn" id="sched-next">›</button>
+      </div>
+      <div class="schedule-wrap">
+        <div class="schedule-sidebar">
+          <div class="schedule-sidebar-title">Unscheduled</div>
+          <ul id="unscheduled-list" class="unscheduled-list"></ul>
+        </div>
+        <div class="timeline-wrap" id="timeline-wrap"></div>
+      </div>
+    </section>
+
+    <!-- ── VIEW: REMINDERS ── -->
+    <section class="view hidden" id="view-reminders">
+      <div class="add-task-card">
+        <input type="text" id="reminder-input" class="task-input" placeholder="Set a reminder… (press R)" maxlength="100" />
+        <div class="task-meta-row">
+          <input type="date" id="reminder-date" class="meta-select" />
+          <input type="time" id="reminder-time-input" class="meta-select" />
+          <select id="reminder-repeat" class="meta-select">
+            <option value="none">No repeat</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+          </select>
+          <button class="add-btn" id="add-reminder-btn">+ Set</button>
+        </div>
+      </div>
+      <ul class="task-list" id="reminder-list"></ul>
+      <div class="empty-state hidden" id="reminder-empty">
+        <div class="empty-icon">◷</div>
+        <p>No reminders set yet.</p>
+      </div>
+    </section>
+
+    <!-- ── VIEW: WEEKLY STATS ── -->
+    <section class="view hidden" id="view-stats">
+      <div class="stats-grid" id="stats-grid"></div>
+      <div class="chart-section">
+        <div class="chart-title">Tasks completed vs added — last 7 days</div>
+        <div class="bar-chart" id="bar-chart"></div>
+      </div>
+      <div class="chart-section">
+        <div class="chart-title">Category breakdown</div>
+        <div class="cat-chart" id="cat-chart"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── TOAST ── -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ── OFFLINE BANNER ── -->
+  <div class="offline-banner" id="offline-banner">📴 You are offline — all data saved locally</div>
+
+  <!-- ── INSTALL PROMPT BANNER ── -->
+  <div class="install-banner hidden" id="install-banner">
+    <span>📲 Add WorkFlow to your home screen for quick access</span>
+    <div class="install-actions">
+      <button class="install-yes" id="install-yes">Install</button>
+      <button class="install-no" id="install-no">Not now</button>
+    </div>
+  </div>
+
+  <!-- ── SHORTCUTS MODAL ── -->
+  <div class="modal-backdrop hidden" id="shortcuts-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">Keyboard shortcuts</span>
+        <button class="modal-close" id="shortcuts-close">✕</button>
+      </div>
+      <div class="shortcut-list">
+        <div class="shortcut-row"><kbd>N</kbd><span>New task</span></div>
+        <div class="shortcut-row"><kbd>R</kbd><span>New reminder</span></div>
+        <div class="shortcut-row"><kbd>/</kbd><span>Focus search</span></div>
+        <div class="shortcut-row"><kbd>?</kbd><span>Show this help</span></div>
+        <div class="shortcut-row"><kbd>Esc</kbd><span>Close modal / blur input</span></div>
+        <div class="shortcut-row"><kbd>Enter</kbd><span>Submit focused form</span></div>
+        <div class="shortcut-row"><kbd>1</kbd><span>Go to Today</span></div>
+        <div class="shortcut-row"><kbd>2</kbd><span>Go to All Tasks</span></div>
+        <div class="shortcut-row"><kbd>3</kbd><span>Go to Schedule</span></div>
+        <div class="shortcut-row"><kbd>4</kbd><span>Go to Reminders</span></div>
+        <div class="shortcut-row"><kbd>5</kbd><span>Go to Stats</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ROLLOVER MODAL ── -->
+  <div class="modal-backdrop hidden" id="rollover-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">🌙 End of day — roll tasks over?</span>
+        <button class="modal-close" id="rollover-close">✕</button>
+      </div>
+      <p class="modal-subtitle">These tasks from today are incomplete:</p>
+      <ul id="rollover-list" class="rollover-list"></ul>
+      <div class="modal-actions">
+        <button class="add-btn" id="rollover-all">Roll all to tomorrow</button>
+        <button class="btn-ghost" id="rollover-dismiss">Dismiss</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SUBTASK / EDIT MODAL ── -->
+  <div class="modal-backdrop hidden" id="subtask-modal">
+    <div class="modal modal-wide">
+      <div class="modal-header">
+        <span class="modal-title" id="subtask-modal-title">Task details</span>
+        <button class="modal-close" id="subtask-close">✕</button>
+      </div>
+
+      <!-- Edit fields -->
+      <div class="edit-fields-section">
+        <label class="notes-label">Title</label>
+        <input type="text" id="edit-task-title" class="task-input" maxlength="120" style="margin-bottom:10px" />
+        <div class="task-meta-row" style="margin-bottom:0">
+          <select id="edit-task-priority" class="meta-select">
+            <option value="high">🔴 High</option>
+            <option value="medium">🟡 Medium</option>
+            <option value="low">🟢 Low</option>
+          </select>
+          <select id="edit-task-category" class="meta-select">
+            <option value="work">💼 Work</option>
+            <option value="personal">🏠 Personal</option>
+            <option value="meeting">🤝 Meeting</option>
+            <option value="learning">📚 Learning</option>
+          </select>
+          <select id="edit-task-recur" class="meta-select">
+            <option value="none">No repeat</option>
+            <option value="daily">↻ Daily</option>
+            <option value="weekly">↻ Weekly</option>
+          </select>
+          <input type="date" id="edit-task-date" class="meta-select" />
+          <input type="time" id="edit-task-time" class="meta-select" />
+        </div>
+      </div>
+
+      <div class="subtask-notes-area">
+        <label class="notes-label">Notes</label>
+        <textarea id="subtask-notes" class="notes-textarea" placeholder="Add notes, links, or context…" rows="3"></textarea>
+      </div>
+      <div class="subtask-section">
+        <div class="subtask-header-row">
+          <span class="notes-label">Subtasks</span>
+          <span class="subtask-progress" id="subtask-progress"></span>
+        </div>
+        <ul id="subtask-list" class="subtask-list"></ul>
+        <div class="subtask-add-row">
+          <input type="text" id="subtask-input" class="task-input" placeholder="Add a subtask…" maxlength="80" />
+          <button class="add-btn small" id="subtask-add-btn">+</button>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="add-btn" id="subtask-save">Save changes</button>
+        <button class="btn-ghost" id="subtask-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="db.js"></script>
+  <script src="sounds.js"></script>
+  <script src="reminder-card.js"></script>
+  <script src="sound-settings.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
