@@ -1,5 +1,5 @@
 {
-  "name": "WorkFlow — Daily Planner",
+  "name": "Task Assign",
   "short_name": "WorkFlow",
   "description": "Daily work assignment and reminder tracker — works offline",
   "start_url": "./index.html",
@@ -21,22 +21,34 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["productivity", "utilities"],
-  "screenshots": [],
+  "categories": [
+    "productivity",
+    "utilities"
+  ],
   "shortcuts": [
     {
       "name": "Add Task",
       "short_name": "New Task",
       "description": "Quickly add a new task for today",
       "url": "./index.html#today",
-      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Set Reminder",
       "short_name": "Reminder",
       "description": "Set a new reminder",
       "url": "./index.html#reminders",
-      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }
