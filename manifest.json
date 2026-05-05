@@ -1,5 +1,5 @@
 {
-  "name": "Task Assign",
+  "name": "WorkFlow — Daily Planner",
   "short_name": "WorkFlow",
   "description": "Daily work assignment and reminder tracker — works offline",
   "start_url": "./index.html",
@@ -7,6 +7,7 @@
   "orientation": "portrait-primary",
   "background_color": "#0f1117",
   "theme_color": "#7c6af7",
+
   "icons": [
     {
       "src": "icon-192.png",
@@ -21,10 +22,9 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": [
-    "productivity",
-    "utilities"
-  ],
+
+  "categories": ["productivity", "utilities"],
+
   "shortcuts": [
     {
       "name": "Add Task",
